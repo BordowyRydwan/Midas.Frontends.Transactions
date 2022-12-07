@@ -2,10 +2,10 @@ version: '3.5'
 
 services:
   frontend:
-    container_name: base_frontend
+    container_name: transactions_frontend
     build: .
     ports:
-      - '4001:80'
+      - '4003:80'
 
 networks:
   default:
