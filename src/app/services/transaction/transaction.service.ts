@@ -16,6 +16,15 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
 export default class BaseApiService {
   protected transformOptions(options: any): Promise<any> {
+    const session_token = document.cookie
+      .split(';')
+      .map((x) => x.trim().split('='))
+      .find(x => x[0] == 'USER_SESSION');
+
+    if(session_token !== null && session_token !== undefined) {
+      options.headers = options.headers.append('Authorization', session_token[1]);
+    }
+
     return Promise.resolve(options);
   }
 }
@@ -30,74 +39,30 @@ export interface ITransactionApiService {
      */
     getTransactionCategories(): Observable<SwaggerResponse<TransactionCategoryListDto>>;
     /**
-     * @param transactionId (optional) 
-     * @param file_Data_CanRead (optional) 
-     * @param file_Data_CanWrite (optional) 
-     * @param file_Data_CanSeek (optional) 
-     * @param file_Data_CanTimeout (optional) 
-     * @param file_Data_Length (optional) 
-     * @param file_Data_Position (optional) 
-     * @param file_Data_ReadTimeout (optional) 
-     * @param file_Data_WriteTimeout (optional) 
-     * @param file_FileName (optional) 
-     * @param file_ContentType (optional) 
+     * @param body (optional) 
      * @return Success
      */
-    addInvoice(transactionId: number | undefined, file_Data_CanRead: boolean | undefined, file_Data_CanWrite: boolean | undefined, file_Data_CanSeek: boolean | undefined, file_Data_CanTimeout: boolean | undefined, file_Data_Length: number | undefined, file_Data_Position: number | undefined, file_Data_ReadTimeout: number | undefined, file_Data_WriteTimeout: number | undefined, file_FileName: string | undefined, file_ContentType: string | undefined): Observable<SwaggerResponse<void>>;
+    addInvoice(body: AddInvoiceDto | undefined): Observable<SwaggerResponse<FileMetadataDto>>;
     /**
      * @param id (optional) 
      * @return Success
      */
     deleteInvoice(id: string | undefined): Observable<SwaggerResponse<void>>;
     /**
-     * @param id (optional) 
-     * @param title (optional) 
-     * @param description (optional) 
-     * @param recipientName (optional) 
-     * @param amount (optional) 
-     * @param dateCreated (optional) 
-     * @param dateModified (optional) 
-     * @param userId (optional) 
-     * @param currencyCode (optional) 
-     * @param currency_Code (optional) 
-     * @param currency_IsDefault (optional) 
-     * @param currency_FactorToDefaultCurrency (optional) 
-     * @param transactionCategoryId (optional) 
-     * @param transactionCategory_Id (optional) 
-     * @param transactionCategory_Name (optional) 
-     * @param transactionCategory_IsIncome (optional) 
-     * @param invoices_Count (optional) 
-     * @param invoices_Items (optional) 
+     * @param body (optional) 
      * @return Success
      */
-    addTransaction(id: number | undefined, title: string | undefined, description: string | undefined, recipientName: string | undefined, amount: number | undefined, dateCreated: Date | undefined, dateModified: Date | undefined, userId: number | undefined, currencyCode: string | undefined, currency_Code: string | undefined, currency_IsDefault: boolean | undefined, currency_FactorToDefaultCurrency: number | undefined, transactionCategoryId: number | undefined, transactionCategory_Id: number | undefined, transactionCategory_Name: string | undefined, transactionCategory_IsIncome: boolean | undefined, invoices_Count: number | undefined, invoices_Items: InvoiceDto[] | undefined): Observable<SwaggerResponse<void>>;
+    addTransaction(body: TransactionDto | undefined): Observable<SwaggerResponse<void>>;
     /**
      * @param id (optional) 
      * @return Success
      */
     deleteTransaction(id: number | undefined): Observable<SwaggerResponse<void>>;
     /**
-     * @param id (optional) 
-     * @param title (optional) 
-     * @param description (optional) 
-     * @param recipientName (optional) 
-     * @param amount (optional) 
-     * @param dateCreated (optional) 
-     * @param dateModified (optional) 
-     * @param userId (optional) 
-     * @param currencyCode (optional) 
-     * @param currency_Code (optional) 
-     * @param currency_IsDefault (optional) 
-     * @param currency_FactorToDefaultCurrency (optional) 
-     * @param transactionCategoryId (optional) 
-     * @param transactionCategory_Id (optional) 
-     * @param transactionCategory_Name (optional) 
-     * @param transactionCategory_IsIncome (optional) 
-     * @param invoices_Count (optional) 
-     * @param invoices_Items (optional) 
+     * @param body (optional) 
      * @return Success
      */
-    modifyTransaction(id: number | undefined, title: string | undefined, description: string | undefined, recipientName: string | undefined, amount: number | undefined, dateCreated: Date | undefined, dateModified: Date | undefined, userId: number | undefined, currencyCode: string | undefined, currency_Code: string | undefined, currency_IsDefault: boolean | undefined, currency_FactorToDefaultCurrency: number | undefined, transactionCategoryId: number | undefined, transactionCategory_Id: number | undefined, transactionCategory_Name: string | undefined, transactionCategory_IsIncome: boolean | undefined, invoices_Count: number | undefined, invoices_Items: InvoiceDto[] | undefined): Observable<SwaggerResponse<void>>;
+    modifyTransaction(body: TransactionDto | undefined): Observable<SwaggerResponse<void>>;
     /**
      * @return Success
      */
@@ -232,71 +197,22 @@ export class TransactionApiService extends BaseApiService implements ITransactio
     }
 
     /**
-     * @param transactionId (optional) 
-     * @param file_Data_CanRead (optional) 
-     * @param file_Data_CanWrite (optional) 
-     * @param file_Data_CanSeek (optional) 
-     * @param file_Data_CanTimeout (optional) 
-     * @param file_Data_Length (optional) 
-     * @param file_Data_Position (optional) 
-     * @param file_Data_ReadTimeout (optional) 
-     * @param file_Data_WriteTimeout (optional) 
-     * @param file_FileName (optional) 
-     * @param file_ContentType (optional) 
+     * @param body (optional) 
      * @return Success
      */
-    addInvoice(transactionId: number | undefined, file_Data_CanRead: boolean | undefined, file_Data_CanWrite: boolean | undefined, file_Data_CanSeek: boolean | undefined, file_Data_CanTimeout: boolean | undefined, file_Data_Length: number | undefined, file_Data_Position: number | undefined, file_Data_ReadTimeout: number | undefined, file_Data_WriteTimeout: number | undefined, file_FileName: string | undefined, file_ContentType: string | undefined): Observable<SwaggerResponse<void>> {
-        let url_ = this.baseUrl + "/Invoice?";
-        if (transactionId === null)
-            throw new Error("The parameter 'transactionId' cannot be null.");
-        else if (transactionId !== undefined)
-            url_ += "TransactionId=" + encodeURIComponent("" + transactionId) + "&";
-        if (file_Data_CanRead === null)
-            throw new Error("The parameter 'file_Data_CanRead' cannot be null.");
-        else if (file_Data_CanRead !== undefined)
-            url_ += "File.Data.CanRead=" + encodeURIComponent("" + file_Data_CanRead) + "&";
-        if (file_Data_CanWrite === null)
-            throw new Error("The parameter 'file_Data_CanWrite' cannot be null.");
-        else if (file_Data_CanWrite !== undefined)
-            url_ += "File.Data.CanWrite=" + encodeURIComponent("" + file_Data_CanWrite) + "&";
-        if (file_Data_CanSeek === null)
-            throw new Error("The parameter 'file_Data_CanSeek' cannot be null.");
-        else if (file_Data_CanSeek !== undefined)
-            url_ += "File.Data.CanSeek=" + encodeURIComponent("" + file_Data_CanSeek) + "&";
-        if (file_Data_CanTimeout === null)
-            throw new Error("The parameter 'file_Data_CanTimeout' cannot be null.");
-        else if (file_Data_CanTimeout !== undefined)
-            url_ += "File.Data.CanTimeout=" + encodeURIComponent("" + file_Data_CanTimeout) + "&";
-        if (file_Data_Length === null)
-            throw new Error("The parameter 'file_Data_Length' cannot be null.");
-        else if (file_Data_Length !== undefined)
-            url_ += "File.Data.Length=" + encodeURIComponent("" + file_Data_Length) + "&";
-        if (file_Data_Position === null)
-            throw new Error("The parameter 'file_Data_Position' cannot be null.");
-        else if (file_Data_Position !== undefined)
-            url_ += "File.Data.Position=" + encodeURIComponent("" + file_Data_Position) + "&";
-        if (file_Data_ReadTimeout === null)
-            throw new Error("The parameter 'file_Data_ReadTimeout' cannot be null.");
-        else if (file_Data_ReadTimeout !== undefined)
-            url_ += "File.Data.ReadTimeout=" + encodeURIComponent("" + file_Data_ReadTimeout) + "&";
-        if (file_Data_WriteTimeout === null)
-            throw new Error("The parameter 'file_Data_WriteTimeout' cannot be null.");
-        else if (file_Data_WriteTimeout !== undefined)
-            url_ += "File.Data.WriteTimeout=" + encodeURIComponent("" + file_Data_WriteTimeout) + "&";
-        if (file_FileName === null)
-            throw new Error("The parameter 'file_FileName' cannot be null.");
-        else if (file_FileName !== undefined)
-            url_ += "File.FileName=" + encodeURIComponent("" + file_FileName) + "&";
-        if (file_ContentType === null)
-            throw new Error("The parameter 'file_ContentType' cannot be null.");
-        else if (file_ContentType !== undefined)
-            url_ += "File.ContentType=" + encodeURIComponent("" + file_ContentType) + "&";
+    addInvoice(body: AddInvoiceDto | undefined): Observable<SwaggerResponse<FileMetadataDto>> {
+        let url_ = this.baseUrl + "/Invoice";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(body);
+
         let options_ : any = {
+            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Content-Type": "application/json-patch+json",
+                "Accept": "text/plain"
             })
         };
 
@@ -309,14 +225,14 @@ export class TransactionApiService extends BaseApiService implements ITransactio
                 try {
                     return this.processAddInvoice(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<SwaggerResponse<void>>;
+                    return _observableThrow(e) as any as Observable<SwaggerResponse<FileMetadataDto>>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<SwaggerResponse<void>>;
+                return _observableThrow(response_) as any as Observable<SwaggerResponse<FileMetadataDto>>;
         }));
     }
 
-    protected processAddInvoice(response: HttpResponseBase): Observable<SwaggerResponse<void>> {
+    protected processAddInvoice(response: HttpResponseBase): Observable<SwaggerResponse<FileMetadataDto>> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -325,14 +241,17 @@ export class TransactionApiService extends BaseApiService implements ITransactio
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf<SwaggerResponse<void>>(new SwaggerResponse(status, _headers, null as any));
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = FileMetadataDto.fromJS(resultData200);
+            return _observableOf(new SwaggerResponse(status, _headers, result200));
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<SwaggerResponse<void>>(new SwaggerResponse(status, _headers, null as any));
+        return _observableOf<SwaggerResponse<FileMetadataDto>>(new SwaggerResponse(status, _headers, null as any));
     }
 
     /**
@@ -390,111 +309,21 @@ export class TransactionApiService extends BaseApiService implements ITransactio
     }
 
     /**
-     * @param id (optional) 
-     * @param title (optional) 
-     * @param description (optional) 
-     * @param recipientName (optional) 
-     * @param amount (optional) 
-     * @param dateCreated (optional) 
-     * @param dateModified (optional) 
-     * @param userId (optional) 
-     * @param currencyCode (optional) 
-     * @param currency_Code (optional) 
-     * @param currency_IsDefault (optional) 
-     * @param currency_FactorToDefaultCurrency (optional) 
-     * @param transactionCategoryId (optional) 
-     * @param transactionCategory_Id (optional) 
-     * @param transactionCategory_Name (optional) 
-     * @param transactionCategory_IsIncome (optional) 
-     * @param invoices_Count (optional) 
-     * @param invoices_Items (optional) 
+     * @param body (optional) 
      * @return Success
      */
-    addTransaction(id: number | undefined, title: string | undefined, description: string | undefined, recipientName: string | undefined, amount: number | undefined, dateCreated: Date | undefined, dateModified: Date | undefined, userId: number | undefined, currencyCode: string | undefined, currency_Code: string | undefined, currency_IsDefault: boolean | undefined, currency_FactorToDefaultCurrency: number | undefined, transactionCategoryId: number | undefined, transactionCategory_Id: number | undefined, transactionCategory_Name: string | undefined, transactionCategory_IsIncome: boolean | undefined, invoices_Count: number | undefined, invoices_Items: InvoiceDto[] | undefined): Observable<SwaggerResponse<void>> {
-        let url_ = this.baseUrl + "/Add?";
-        if (id === null)
-            throw new Error("The parameter 'id' cannot be null.");
-        else if (id !== undefined)
-            url_ += "Id=" + encodeURIComponent("" + id) + "&";
-        if (title === null)
-            throw new Error("The parameter 'title' cannot be null.");
-        else if (title !== undefined)
-            url_ += "Title=" + encodeURIComponent("" + title) + "&";
-        if (description === null)
-            throw new Error("The parameter 'description' cannot be null.");
-        else if (description !== undefined)
-            url_ += "Description=" + encodeURIComponent("" + description) + "&";
-        if (recipientName === null)
-            throw new Error("The parameter 'recipientName' cannot be null.");
-        else if (recipientName !== undefined)
-            url_ += "RecipientName=" + encodeURIComponent("" + recipientName) + "&";
-        if (amount === null)
-            throw new Error("The parameter 'amount' cannot be null.");
-        else if (amount !== undefined)
-            url_ += "Amount=" + encodeURIComponent("" + amount) + "&";
-        if (dateCreated === null)
-            throw new Error("The parameter 'dateCreated' cannot be null.");
-        else if (dateCreated !== undefined)
-            url_ += "DateCreated=" + encodeURIComponent(dateCreated ? "" + dateCreated.toISOString() : "") + "&";
-        if (dateModified === null)
-            throw new Error("The parameter 'dateModified' cannot be null.");
-        else if (dateModified !== undefined)
-            url_ += "DateModified=" + encodeURIComponent(dateModified ? "" + dateModified.toISOString() : "") + "&";
-        if (userId === null)
-            throw new Error("The parameter 'userId' cannot be null.");
-        else if (userId !== undefined)
-            url_ += "UserId=" + encodeURIComponent("" + userId) + "&";
-        if (currencyCode === null)
-            throw new Error("The parameter 'currencyCode' cannot be null.");
-        else if (currencyCode !== undefined)
-            url_ += "CurrencyCode=" + encodeURIComponent("" + currencyCode) + "&";
-        if (currency_Code === null)
-            throw new Error("The parameter 'currency_Code' cannot be null.");
-        else if (currency_Code !== undefined)
-            url_ += "Currency.Code=" + encodeURIComponent("" + currency_Code) + "&";
-        if (currency_IsDefault === null)
-            throw new Error("The parameter 'currency_IsDefault' cannot be null.");
-        else if (currency_IsDefault !== undefined)
-            url_ += "Currency.IsDefault=" + encodeURIComponent("" + currency_IsDefault) + "&";
-        if (currency_FactorToDefaultCurrency === null)
-            throw new Error("The parameter 'currency_FactorToDefaultCurrency' cannot be null.");
-        else if (currency_FactorToDefaultCurrency !== undefined)
-            url_ += "Currency.FactorToDefaultCurrency=" + encodeURIComponent("" + currency_FactorToDefaultCurrency) + "&";
-        if (transactionCategoryId === null)
-            throw new Error("The parameter 'transactionCategoryId' cannot be null.");
-        else if (transactionCategoryId !== undefined)
-            url_ += "TransactionCategoryId=" + encodeURIComponent("" + transactionCategoryId) + "&";
-        if (transactionCategory_Id === null)
-            throw new Error("The parameter 'transactionCategory_Id' cannot be null.");
-        else if (transactionCategory_Id !== undefined)
-            url_ += "TransactionCategory.Id=" + encodeURIComponent("" + transactionCategory_Id) + "&";
-        if (transactionCategory_Name === null)
-            throw new Error("The parameter 'transactionCategory_Name' cannot be null.");
-        else if (transactionCategory_Name !== undefined)
-            url_ += "TransactionCategory.Name=" + encodeURIComponent("" + transactionCategory_Name) + "&";
-        if (transactionCategory_IsIncome === null)
-            throw new Error("The parameter 'transactionCategory_IsIncome' cannot be null.");
-        else if (transactionCategory_IsIncome !== undefined)
-            url_ += "TransactionCategory.IsIncome=" + encodeURIComponent("" + transactionCategory_IsIncome) + "&";
-        if (invoices_Count === null)
-            throw new Error("The parameter 'invoices_Count' cannot be null.");
-        else if (invoices_Count !== undefined)
-            url_ += "Invoices.Count=" + encodeURIComponent("" + invoices_Count) + "&";
-        if (invoices_Items === null)
-            throw new Error("The parameter 'invoices_Items' cannot be null.");
-        else if (invoices_Items !== undefined)
-            invoices_Items && invoices_Items.forEach((item, index) => {
-                for (let attr in item)
-        			if (item.hasOwnProperty(attr)) {
-        				url_ += "Invoices.Items[" + index + "]." + attr + "=" + encodeURIComponent("" + (item as any)[attr]) + "&";
-        			}
-            });
+    addTransaction(body: TransactionDto | undefined): Observable<SwaggerResponse<void>> {
+        let url_ = this.baseUrl + "/Add";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(body);
+
         let options_ : any = {
+            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Content-Type": "application/json-patch+json",
             })
         };
 
@@ -588,111 +417,21 @@ export class TransactionApiService extends BaseApiService implements ITransactio
     }
 
     /**
-     * @param id (optional) 
-     * @param title (optional) 
-     * @param description (optional) 
-     * @param recipientName (optional) 
-     * @param amount (optional) 
-     * @param dateCreated (optional) 
-     * @param dateModified (optional) 
-     * @param userId (optional) 
-     * @param currencyCode (optional) 
-     * @param currency_Code (optional) 
-     * @param currency_IsDefault (optional) 
-     * @param currency_FactorToDefaultCurrency (optional) 
-     * @param transactionCategoryId (optional) 
-     * @param transactionCategory_Id (optional) 
-     * @param transactionCategory_Name (optional) 
-     * @param transactionCategory_IsIncome (optional) 
-     * @param invoices_Count (optional) 
-     * @param invoices_Items (optional) 
+     * @param body (optional) 
      * @return Success
      */
-    modifyTransaction(id: number | undefined, title: string | undefined, description: string | undefined, recipientName: string | undefined, amount: number | undefined, dateCreated: Date | undefined, dateModified: Date | undefined, userId: number | undefined, currencyCode: string | undefined, currency_Code: string | undefined, currency_IsDefault: boolean | undefined, currency_FactorToDefaultCurrency: number | undefined, transactionCategoryId: number | undefined, transactionCategory_Id: number | undefined, transactionCategory_Name: string | undefined, transactionCategory_IsIncome: boolean | undefined, invoices_Count: number | undefined, invoices_Items: InvoiceDto[] | undefined): Observable<SwaggerResponse<void>> {
-        let url_ = this.baseUrl + "/Modify?";
-        if (id === null)
-            throw new Error("The parameter 'id' cannot be null.");
-        else if (id !== undefined)
-            url_ += "Id=" + encodeURIComponent("" + id) + "&";
-        if (title === null)
-            throw new Error("The parameter 'title' cannot be null.");
-        else if (title !== undefined)
-            url_ += "Title=" + encodeURIComponent("" + title) + "&";
-        if (description === null)
-            throw new Error("The parameter 'description' cannot be null.");
-        else if (description !== undefined)
-            url_ += "Description=" + encodeURIComponent("" + description) + "&";
-        if (recipientName === null)
-            throw new Error("The parameter 'recipientName' cannot be null.");
-        else if (recipientName !== undefined)
-            url_ += "RecipientName=" + encodeURIComponent("" + recipientName) + "&";
-        if (amount === null)
-            throw new Error("The parameter 'amount' cannot be null.");
-        else if (amount !== undefined)
-            url_ += "Amount=" + encodeURIComponent("" + amount) + "&";
-        if (dateCreated === null)
-            throw new Error("The parameter 'dateCreated' cannot be null.");
-        else if (dateCreated !== undefined)
-            url_ += "DateCreated=" + encodeURIComponent(dateCreated ? "" + dateCreated.toISOString() : "") + "&";
-        if (dateModified === null)
-            throw new Error("The parameter 'dateModified' cannot be null.");
-        else if (dateModified !== undefined)
-            url_ += "DateModified=" + encodeURIComponent(dateModified ? "" + dateModified.toISOString() : "") + "&";
-        if (userId === null)
-            throw new Error("The parameter 'userId' cannot be null.");
-        else if (userId !== undefined)
-            url_ += "UserId=" + encodeURIComponent("" + userId) + "&";
-        if (currencyCode === null)
-            throw new Error("The parameter 'currencyCode' cannot be null.");
-        else if (currencyCode !== undefined)
-            url_ += "CurrencyCode=" + encodeURIComponent("" + currencyCode) + "&";
-        if (currency_Code === null)
-            throw new Error("The parameter 'currency_Code' cannot be null.");
-        else if (currency_Code !== undefined)
-            url_ += "Currency.Code=" + encodeURIComponent("" + currency_Code) + "&";
-        if (currency_IsDefault === null)
-            throw new Error("The parameter 'currency_IsDefault' cannot be null.");
-        else if (currency_IsDefault !== undefined)
-            url_ += "Currency.IsDefault=" + encodeURIComponent("" + currency_IsDefault) + "&";
-        if (currency_FactorToDefaultCurrency === null)
-            throw new Error("The parameter 'currency_FactorToDefaultCurrency' cannot be null.");
-        else if (currency_FactorToDefaultCurrency !== undefined)
-            url_ += "Currency.FactorToDefaultCurrency=" + encodeURIComponent("" + currency_FactorToDefaultCurrency) + "&";
-        if (transactionCategoryId === null)
-            throw new Error("The parameter 'transactionCategoryId' cannot be null.");
-        else if (transactionCategoryId !== undefined)
-            url_ += "TransactionCategoryId=" + encodeURIComponent("" + transactionCategoryId) + "&";
-        if (transactionCategory_Id === null)
-            throw new Error("The parameter 'transactionCategory_Id' cannot be null.");
-        else if (transactionCategory_Id !== undefined)
-            url_ += "TransactionCategory.Id=" + encodeURIComponent("" + transactionCategory_Id) + "&";
-        if (transactionCategory_Name === null)
-            throw new Error("The parameter 'transactionCategory_Name' cannot be null.");
-        else if (transactionCategory_Name !== undefined)
-            url_ += "TransactionCategory.Name=" + encodeURIComponent("" + transactionCategory_Name) + "&";
-        if (transactionCategory_IsIncome === null)
-            throw new Error("The parameter 'transactionCategory_IsIncome' cannot be null.");
-        else if (transactionCategory_IsIncome !== undefined)
-            url_ += "TransactionCategory.IsIncome=" + encodeURIComponent("" + transactionCategory_IsIncome) + "&";
-        if (invoices_Count === null)
-            throw new Error("The parameter 'invoices_Count' cannot be null.");
-        else if (invoices_Count !== undefined)
-            url_ += "Invoices.Count=" + encodeURIComponent("" + invoices_Count) + "&";
-        if (invoices_Items === null)
-            throw new Error("The parameter 'invoices_Items' cannot be null.");
-        else if (invoices_Items !== undefined)
-            invoices_Items && invoices_Items.forEach((item, index) => {
-                for (let attr in item)
-        			if (item.hasOwnProperty(attr)) {
-        				url_ += "Invoices.Items[" + index + "]." + attr + "=" + encodeURIComponent("" + (item as any)[attr]) + "&";
-        			}
-            });
+    modifyTransaction(body: TransactionDto | undefined): Observable<SwaggerResponse<void>> {
+        let url_ = this.baseUrl + "/Modify";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(body);
+
         let options_ : any = {
+            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Content-Type": "application/json-patch+json",
             })
         };
 
@@ -854,6 +593,46 @@ export class TransactionApiService extends BaseApiService implements ITransactio
         }
         return _observableOf<SwaggerResponse<TransactionListDto>>(new SwaggerResponse(status, _headers, null as any));
     }
+}
+
+export class AddInvoiceDto implements IAddInvoiceDto {
+    transactionId?: number;
+    fileId?: string;
+
+    constructor(data?: IAddInvoiceDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.transactionId = _data["transactionId"];
+            this.fileId = _data["fileId"];
+        }
+    }
+
+    static fromJS(data: any): AddInvoiceDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddInvoiceDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["transactionId"] = this.transactionId;
+        data["fileId"] = this.fileId;
+        return data;
+    }
+}
+
+export interface IAddInvoiceDto {
+    transactionId?: number;
+    fileId?: string;
 }
 
 export class CurrencyDto implements ICurrencyDto {
@@ -1193,9 +972,7 @@ export class TransactionDto implements ITransactionDto {
     dateCreated?: Date;
     dateModified?: Date;
     userId?: number;
-    currencyCode?: string | undefined;
     currency?: CurrencyDto;
-    transactionCategoryId?: number;
     transactionCategory?: TransactionCategoryDto;
     invoices?: InvoiceListDto;
 
@@ -1218,9 +995,7 @@ export class TransactionDto implements ITransactionDto {
             this.dateCreated = _data["dateCreated"] ? new Date(_data["dateCreated"].toString()) : <any>undefined;
             this.dateModified = _data["dateModified"] ? new Date(_data["dateModified"].toString()) : <any>undefined;
             this.userId = _data["userId"];
-            this.currencyCode = _data["currencyCode"];
             this.currency = _data["currency"] ? CurrencyDto.fromJS(_data["currency"]) : <any>undefined;
-            this.transactionCategoryId = _data["transactionCategoryId"];
             this.transactionCategory = _data["transactionCategory"] ? TransactionCategoryDto.fromJS(_data["transactionCategory"]) : <any>undefined;
             this.invoices = _data["invoices"] ? InvoiceListDto.fromJS(_data["invoices"]) : <any>undefined;
         }
@@ -1243,9 +1018,7 @@ export class TransactionDto implements ITransactionDto {
         data["dateCreated"] = this.dateCreated ? this.dateCreated.toISOString() : <any>undefined;
         data["dateModified"] = this.dateModified ? this.dateModified.toISOString() : <any>undefined;
         data["userId"] = this.userId;
-        data["currencyCode"] = this.currencyCode;
         data["currency"] = this.currency ? this.currency.toJSON() : <any>undefined;
-        data["transactionCategoryId"] = this.transactionCategoryId;
         data["transactionCategory"] = this.transactionCategory ? this.transactionCategory.toJSON() : <any>undefined;
         data["invoices"] = this.invoices ? this.invoices.toJSON() : <any>undefined;
         return data;
@@ -1261,9 +1034,7 @@ export interface ITransactionDto {
     dateCreated?: Date;
     dateModified?: Date;
     userId?: number;
-    currencyCode?: string | undefined;
     currency?: CurrencyDto;
-    transactionCategoryId?: number;
     transactionCategory?: TransactionCategoryDto;
     invoices?: InvoiceListDto;
 }
@@ -1375,3 +1146,43 @@ function blobToText(blob: any): Observable<string> {
         }
     });
 }
+
+/*export class FileParameter implements IFileParameter {
+  data?: any;
+  fileName?: string;
+
+  constructor(data?: IFileParameter) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.data = _data["data"];
+      (<any>this).fileName = _data["fileName"];
+    }
+  }
+
+  static fromJS(data: any): FileParameter {
+    data = typeof data === 'object' ? data : {};
+    let result = new FileParameter();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+    data["fileName"] = this.fileName;
+    return data;
+  }
+}
+
+export interface IFileParameter {
+  data?: any;
+  fileName?: string;
+}*/

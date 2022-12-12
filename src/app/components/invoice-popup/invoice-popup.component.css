@@ -1,0 +1,37 @@
+.invoice-form {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 280px;
+  width: 80vw;
+  max-width: 800px;
+}
+
+.invoice-form__progress {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  border-radius: 2px;
+}
+
+.invoice-form__buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  column-gap: 20px;
+}
+
+.invoice-form__button {
+  margin: 10px 0;
+  position: relative;
+}
+
+.invoice-form__table {
+  margin-bottom: 20px;
+}
+
+.mat-column-icons {
+  width: 150px;
+}

@@ -1,0 +1,53 @@
+<div class="invoice-form">
+  <p class="mat-h1">Faktury - {{ transaction.title }}</p>
+
+  <table mat-table [dataSource]="invoices" class="invoice-form__table">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Nazwa pliku</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.fileMetadata.name }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="icons">
+      <th mat-header-cell *matHeaderCellDef>Akcje</th>
+      <td mat-cell *matCellDef="let element">
+        <button
+          mat-icon-button
+          matTooltip="Usuń"
+          (click)="deleteInvoice(element.fileId)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          matTooltip="Pobierz"
+          (click)="downloadInvoice(element.fileId)"
+        >
+          <mat-icon>download</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="2">
+        Dla tej transakcji nie przypisano żadnej faktury
+      </td>
+    </tr>
+  </table>
+
+  <div class="invoice-form__buttons">
+    <button
+      mat-raised-button
+      color="primary"
+      class="invoice-form__button"
+      (click)="onNoClick()"
+    >
+      Wyjdź
+    </button>
+  </div>
+</div>
+

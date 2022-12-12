@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TransactionPopupComponent } from './transaction-popup.component';
 
-describe('TransactionComponent', () => {
+describe('TransactionPopupComponent', () => {
   let component: TransactionPopupComponent;
   let fixture: ComponentFixture<TransactionPopupComponent>;
 

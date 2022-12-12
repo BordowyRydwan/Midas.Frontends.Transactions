@@ -1,1 +1,111 @@
-<p>transaction-list works!</p>
+<section>
+  <div class="subsection">
+    <ng-template [ngIf]="state === states.LOADED">
+      <div class="transaction-list__headline">
+        <h1>Transakcje</h1>
+        <a [routerLink]="'/transactions/list/' + userId + '/add'">
+          <mat-icon>add</mat-icon>
+        </a>
+      </div>
+
+      <div class="transaction-list__headline">
+        <mat-form-field class="full-width" appearance="fill">
+          <mat-label>Szukaj...</mat-label>
+          <input matInput (keyup)="applyFilter($event)" #input>
+        </mat-form-field>
+      </div>
+
+      <table mat-table [dataSource]="transactions" class="mat-elevation-z8" matSort>
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Nazwa </th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.title }}
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <ng-container matColumnDef="recipientName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Odbiorca </th>
+          <td mat-cell *matCellDef="let item"> {{ item.recipientName }} </td>
+          <td mat-footer-cell *matFooterCellDef>
+            <strong>Suma dla wszystkich transakcji:</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Kwota </th>
+          <td mat-cell *matCellDef="let item">
+            {{ getAmount(item) }}
+          </td>
+          <td mat-footer-cell *matFooterCellDef>
+            <strong>{{ sum }}</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="currency">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Waluta </th>
+          <td mat-cell *matCellDef="let item"> {{ item.currency.code }} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Kategoria </th>
+          <td mat-cell *matCellDef="let item"> {{ item.transactionCategory.name }} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Data </th>
+          <td mat-cell *matCellDef="let item"> {{ item.dateCreated.toLocaleDateString() }} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <ng-container matColumnDef="icons">
+          <th mat-header-cell *matHeaderCellDef>&nbsp;</th>
+          <td mat-cell *matCellDef="let item">
+            <button
+              mat-icon-button
+              (click)="deleteTransaction(item.id)"
+              matTooltip="Usuń"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="openTransactionDialog(item)"
+              matTooltip="Edytuj"
+            >
+              <mat-icon>settings</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="openInvoiceDialog(item)"
+              matTooltip="Faktury"
+            >
+              <mat-icon>description</mat-icon>
+            </button>
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row [ngClass]="" *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-footer-row *matFooterRowDef="displayedColumns"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="6">Nie znaleziono transakcji</td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[10, 25, 100]" aria-label="Wybierz stronę"></mat-paginator>
+    </ng-template>
+
+    <ng-template [ngIf]="state === states.LOADING">
+      <mat-spinner [diameter]="50"></mat-spinner>
+    </ng-template>
+
+    <ng-template [ngIf]="state === states.ERROR">
+      Błąd ładowania listy transakcji. Spróbuj ponownie za chwilę!
+    </ng-template>
+  </div>
+</section>
+

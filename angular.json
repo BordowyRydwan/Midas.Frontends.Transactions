@@ -30,7 +30,8 @@
             "customWebpackConfig": {
               "path": "extra-webpack.config.js",
               "libraryName": "Transactions",
-              "libraryTarget": "umd"
+              "libraryTarget": "system",
+              "excludeAngularDependencies": true
             },
             "deployUrl": "http://localhost:4001/"
           },

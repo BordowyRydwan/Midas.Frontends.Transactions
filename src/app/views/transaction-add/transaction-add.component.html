@@ -1,0 +1,120 @@
+<div class="transaction-add-form__container">
+  <ng-template [ngIf]="state === states.LOADED">
+    <mat-card class="transaction-add-form__card">
+      <mat-card-title class="mat-h2 mat-form-field-flex">
+        <span>Dodawanie transakcji</span>
+        <a routerLink="/transactions">
+          <mat-icon>undo</mat-icon>
+        </a>
+      </mat-card-title>
+      <mat-card-subtitle>
+        Podaj dane transakcji, aby dodać ją do systemu
+      </mat-card-subtitle>
+
+      <form
+        [formGroup]="addTransactionForm"
+        (ngSubmit)="onSubmit()"
+        (change)="cleanAuthError()"
+        class="transaction-add-form"
+      >
+        <mat-form-field class="transaction-add-form__field">
+          <mat-label>Nazwa</mat-label>
+          <input matInput formControlName="title">
+          <mat-error *ngIf="addTransactionForm.controls.title.invalid">
+            Opis musi zawierać pomiędzy 10 a 50 znaków
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="transaction-add-form__field">
+          <mat-label>Odbiorca</mat-label>
+          <input matInput formControlName="recipientName">
+          <mat-error *ngIf="addTransactionForm.controls.description.invalid">
+            Nazwa odbiorcy musi zawierać pomiędzy 10 a 200 znaków
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="transaction-add-form__field">
+          <mat-label>Opis</mat-label>
+          <textarea
+            matInput
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="4"
+            cdkAutosizeMaxRows="4"
+            formControlName="description"
+          ></textarea>
+          <mat-error *ngIf="addTransactionForm.controls.description.invalid">
+            Opis musi zawierać pomiędzy 10 a 200 znaków
+          </mat-error>
+        </mat-form-field>
+
+        <mat-radio-group
+          [(ngModel)]="isExpense"
+          (ngModelChange)="updateDropdown()"
+          [ngModelOptions]="{standalone: true}"
+          aria-label="Select an option"
+          class="transaction-add-form__radio-group"
+        >
+          <mat-radio-button [value]="false">Przychód</mat-radio-button>
+          <mat-radio-button [value]="true">Wydatek</mat-radio-button>
+        </mat-radio-group>
+
+        <div class="mat-form-field-flex">
+          <mat-form-field class="transaction-add-form__field">
+            <mat-label>Kwota</mat-label>
+            <input type="number" step="0.01" min="0.01" max="1000000000" matInput formControlName="amount">
+          </mat-form-field>
+
+          <mat-form-field class="transaction-add-form__field">
+            <mat-label>Waluta</mat-label>
+            <mat-select [formControl]="addTransactionForm.controls.currency" [value]="addTransactionForm.controls.currency">
+              <mat-option *ngFor="let currency of currencies" [value]="currency">
+                {{ currency.code }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field class="transaction-add-form__field fill-width">
+            <mat-label>Kategoria</mat-label>
+            <mat-select [formControl]="addTransactionForm.controls.category" [value]="addTransactionForm.controls.category">
+              <mat-option *ngFor="let category of filteredCategories" [value]="category">
+                {{ category.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="transaction-add-form__buttons">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="!addTransactionForm.valid || requestLoading"
+            class="transaction-add-form__button"
+          >
+            DODAJ TRANSAKCJĘ
+            <mat-progress-bar
+              mode="indeterminate"
+              *ngIf="requestLoading"
+              class="transaction-add-form__progress"
+            ></mat-progress-bar>
+          </button>
+
+          <div class="transaction-add-form__error">
+            <div *ngIf="authError.length !== 0">
+              {{ authError }}
+            </div>
+          </div>
+        </div>
+      </form>
+    </mat-card>
+  </ng-template>
+
+  <ng-template [ngIf]="state === states.LOADING">
+    <mat-spinner [diameter]="50"></mat-spinner>
+  </ng-template>
+
+  <ng-template [ngIf]="state === states.ERROR">
+    Błąd ładowania formularza. Spróbuj ponownie za chwilę!
+  </ng-template>
+</div>
+
