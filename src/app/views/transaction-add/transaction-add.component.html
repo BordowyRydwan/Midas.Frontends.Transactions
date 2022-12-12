@@ -3,7 +3,7 @@
     <mat-card class="transaction-add-form__card">
       <mat-card-title class="mat-h2 mat-form-field-flex">
         <span>Dodawanie transakcji</span>
-        <a routerLink="/transactions">
+        <a [routerLink]="'/transactions/list/' + this.userId">
           <mat-icon>undo</mat-icon>
         </a>
       </mat-card-title>
